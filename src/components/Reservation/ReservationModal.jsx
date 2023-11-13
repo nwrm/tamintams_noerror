@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import moment from 'moment-timezone';
 import { getToken, getUuid } from '../../util/token.js';
-import { bookRoom } from "../../service/api";
+import { bookRoom, fetchAllReservations } from "../../service/api";
 import { useNavigate } from "react-router-dom";
 import { TimeCalc } from "../../util/modalUtil.js"
 import "../Reservation/ReservationModal.css";
@@ -28,6 +28,32 @@ const ReservationModal = (props) => {
     };
   });
 
+
+
+  useEffect(() => {
+    const fetchAndFilterTodayReservations = async () => {
+      console.log('fetchAndFilterTodayReservations 함수 호출됨');
+      const token = getToken();
+      const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD 형식
+  
+      const allReservations = await fetchAllReservations(token);
+  
+      // 오늘 날짜에 해당하는 예약만 필터링하고 각 방별로 예약된 시간대 관리
+      const todayReservations = allReservations
+        .filter((reservation) => reservation.bookDate === today && reservation.roomId === roomname)
+        .map(reservation => {
+          // 예약된 시작 시간을 분석하여 시간 슬롯 인덱스로 변환
+          const startTime = parseInt(reservation.bookTime.split(':')[0], 10) - 9;
+          return startTime;
+        });
+  
+      setBookedTimeslots(todayReservations);
+      console.log('booked', todayReservations);
+    };
+    fetchAndFilterTodayReservations();
+  }, [roomname]);
+
+  
   const handleButtonClick = (hour) => {
     setSelectedButtons(prevSelectedButtons => {
       if (prevSelectedButtons.includes(hour)) {
@@ -113,16 +139,13 @@ const ReservationModal = (props) => {
       console.log("예약 성공 응답:", response);
       close();
       setSelectedButtons([]);
-    // 예약 성공 후, 응답에서 받은 예약 정보 고유 ID를 로컬 스토리지에 저장
-    if (response && response.data && response.data._id) {
-      localStorage.setItem('reservationId', response.data._id);
-    }
-
-
     } catch (error) {
       console.error("Error during booking:", error);
       alert("예약 실패: " + (error.response?.data.message || error.message));
+      close();
+      setSelectedButtons([]);
     }
+   
   };
 
 
@@ -135,19 +158,19 @@ const ReservationModal = (props) => {
             <button className="close" onClick={close}>&times;</button>
           </header>
           <main>
-            {timeSlots.map((timeSlot) => {
-              const isBooked = bookedTimeslots.some(bookedSlot => bookedSlot.start <= timeSlot.value && bookedSlot.end >= timeSlot.value);
-              const isSelected = selectedButtons.includes(timeSlot.value);
-              return (
-                <button
-                  key={timeSlot.value}
-                  className={`timelinebutton timeslot ${isSelected ? 'selected' : 'notselected'} ${isBooked ? 'booked' : ''}`}
-                  onClick={() => handleButtonClick(timeSlot.value)}
-                  disabled={isBooked}
-                >
-                  {timeSlot.label}
-                  {isBooked && <span className="booked-label">마감</span>}
-                </button>
+          {timeSlots.map((timeSlot) => {
+    const isBooked = bookedTimeslots.includes(timeSlot.value);
+    const isSelected = selectedButtons.includes(timeSlot.value);
+    return (
+      <button
+        // ...
+        className={`timelinebutton timeslot ${isSelected ? 'selected' : 'notselected'} ${isBooked ? 'booked' : ''}`}
+        onClick={() => handleButtonClick(timeSlot.value)}
+        disabled={isBooked}
+      >
+        {timeSlot.label}
+        {isBooked && <span className="booked-label">마감</span>}
+      </button>
               );
             })}
           </main>
