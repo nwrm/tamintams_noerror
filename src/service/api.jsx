@@ -55,12 +55,12 @@ export const fetchReservationHistory = async (_id, token) => {
 // 예약 삭제 함수
 export const deleteReservation = async (reservationId, token) => {
   try {
-    const response = await axios.delete(`${API_URL}/api/books/${reservationId}`, {
+    await axios.delete(`${API_URL}/api/books/${reservationId}`, {
       headers: {
         'Authorization': `Bearer ${token}`
       },
     });
-    return response.data;
+    return reservationId; //삭제된 함수를 반환하게 수정
   } catch (error) {
     // 에러 핸들링: error 객체 또는 error 메시지를 반환할 수 있습니다.
     console.error('Reservation deletion error:', error);
