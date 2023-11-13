@@ -52,20 +52,6 @@ export const fetchReservationHistory = async (_id, token) => {
 };
 
 
-// API 호출 함수 예시
-export const fetchBookedTimeslots = async (roomId, token) => {
-  try {
-    const response = await axios.get(`[API_URL]/api/reservations/${roomId}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    return response.data; // 예약된 시간대 정보 반환
-  } catch (error) {
-    console.error("Error fetching booked timeslots:", error);
-    throw error;
-  }
-};
-
-
 // 예약 삭제 함수
 export const deleteReservation = async (reservationId, token) => {
   try {
@@ -78,23 +64,6 @@ export const deleteReservation = async (reservationId, token) => {
   } catch (error) {
     // 에러 핸들링: error 객체 또는 error 메시지를 반환할 수 있습니다.
     console.error('Reservation deletion error:', error);
-    throw error;
-  }
-};
-
-//예약 수정하기
-export const editReservation = async (bookDate, bookTime, userId, token) => {
-  try {
-    const response = await axios.patch(`${API_URL}/api/books/${userId}`, {
-      bookDate, bookTime, userId
-    }, { headers: {
-      Authorization: `Bearer ${token}` // 헤더에 토큰을 포함시킴
-    }
-  });
-    console.log("Reservation Update Response:", response.data);
-    return response.data;
-  } catch (error) {
-    console.error("Error updating reservation:", error);
     throw error;
   }
 };
@@ -113,3 +82,29 @@ export const fetchAllReservations = async (token) => {
     throw error;
   }
 };
+
+
+
+
+
+
+
+
+
+
+//예약 수정하기
+// export const editReservation = async (bookDate, bookTime, userId, token) => {
+//   try {
+//     const response = await axios.patch(`${API_URL}/api/books/${userId}`, {
+//       bookDate, bookTime, userId
+//     }, { headers: {
+//       Authorization: `Bearer ${token}` // 헤더에 토큰을 포함시킴
+//     }
+//   });
+//     console.log("Reservation Update Response:", response.data);
+//     return response.data;
+//   } catch (error) {
+//     console.error("Error updating reservation:", error);
+//     throw error;
+//   }
+// };
