@@ -98,12 +98,7 @@ const MyPage = () => {
           {Array.isArray(reservations) && reservations.map(reservations  => (
             <li key={reservations._id}>
               <div>예약자명: {userName}</div>
-              <span  onClick={() => {setEditReservationId(reservations.roomId);}}>회의실명: {reservations.roomId}</span>
-              <select value={editedRoomName} onChange={e => setEditedRoomName(e.target.value)}>
-                    {[...floor2Room, ...floor3Room].map(room => (
-                      <option key={room} value={reservations.roomId}>{room}</option>
-                    ))}
-                  </select>
+              <div >회의실명: {reservations.roomId}</div>
               <div>예약날짜: {reservations.bookDate}</div>
               <div>예약시간: {reservations.bookTime}</div>
               {editReservationId === reservations._id ? (
@@ -119,11 +114,7 @@ const MyPage = () => {
                 </div>
               ) : (
                 <>
-                <button onClick={() => {
-                  setEditReservationId(reservations._id);
-                  // setEditReservationId(reservations.roomId);
-                  setEditedTime(reservations.bookTime);
-                }}>수정</button><button onClick={() => handleDelete(reservations._id)}>삭제</button></>
+                <button onClick={() => handleDelete(reservations._id)}>삭제</button></>
               )}
             </li>
           ))}
