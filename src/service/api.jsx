@@ -25,6 +25,8 @@ export const bookRoom = async (bookDate, bookTime, durationHours, roomId, userId
     
     if (response.status === 201) {
     console.log("Booking Response:", response.data);
+    localStorage.setItem('reservationId', response.data._id);
+    console.log(response.data._id);
     return response.data}
   } catch (error) {
     console.error("Booking error:", error);
@@ -32,31 +34,16 @@ export const bookRoom = async (bookDate, bookTime, durationHours, roomId, userId
   }
 };
 
-// // 예약 내역 조회
-// export const fetchReservationHistory = async (id) => {
-//   try {
-//     // API_URL은 당신의 API 기본 URL로 가정합니다.
-//     const response = await axios.get(`${API_URL}/api/books/${id}`); 
-//       console.log("Reservation History Response:", response.data);
 
-//     return response.data;// 해당 방과 시간에 대한 예약된 시간대를 반환합니다.
-//   } catch (error) {
-//     console.error("Error fetching booked timeslots for room:", error);
-//     throw error; // 함수를 호출하는 곳에서 에러를 처리할 수 있도록 에러를 던집니다.
-//   }
-// };
-
-
-export const fetchReservationHistory = async (id, roomId, userId, bookDate, bookTime, token) => {
+export const fetchReservationHistory = async (_id, token) => {
   try {
-    const response = await axios.get(`${API_URL}/api/users/${id}`,{
-      id, roomId, userId, bookDate, bookTime
-    },    {
-        headers: {
-          Authorization: `Bearer ${token}` // 헤더에 토큰을 포함시킴
-        }
-      });
-    console.log("Reservation History Response:", response.data);
+    // GET 요청에서는 요청 본문이 필요 없으므로 제외합니다.
+    const response = await axios.get(`${API_URL}/api/books/${_id}`, {
+      headers: {
+        Authorization: `Bearer ${token}` // 토큰만 포함
+      }
+    });
+    console.log("Reservation History Response:", response.data); // 응답 로그
     return response.data;
   } catch (error) {
     console.error("Error fetching reservation history:", error);
@@ -65,8 +52,38 @@ export const fetchReservationHistory = async (id, roomId, userId, bookDate, book
 };
 
 
+// API 호출 함수 예시
+export const fetchBookedTimeslots = async (roomId, token) => {
+  try {
+    const response = await axios.get(`[API_URL]/api/reservations/${roomId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data; // 예약된 시간대 정보 반환
+  } catch (error) {
+    console.error("Error fetching booked timeslots:", error);
+    throw error;
+  }
+};
 
-export const updateReservation = async (bookDate, bookTime, userId, token) => {
+
+// 예약 삭제 함수
+export const deleteReservation = async (reservationId, token) => {
+  try {
+    const response = await axios.delete(`${API_URL}/api/books/${reservationId}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+    });
+    return response.data;
+  } catch (error) {
+    // 에러 핸들링: error 객체 또는 error 메시지를 반환할 수 있습니다.
+    console.error('Reservation deletion error:', error);
+    throw error;
+  }
+};
+
+//예약 수정하기
+export const editReservation = async (bookDate, bookTime, userId, token) => {
   try {
     const response = await axios.patch(`${API_URL}/api/books/${userId}`, {
       bookDate, bookTime, userId
@@ -83,3 +100,16 @@ export const updateReservation = async (bookDate, bookTime, userId, token) => {
 };
 
 
+//전체예약조회
+export const fetchAllReservations = async (token) => {
+  try {
+    const response = await axios.get(`${API_URL}/api/books`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data; 
+    // 전체 예약 데이터 반환
+  } catch (error) {
+    console.error("Error fetching all reservations:", error);
+    throw error;
+  }
+};
