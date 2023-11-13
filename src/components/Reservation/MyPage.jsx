@@ -35,12 +35,18 @@ const MyPage = () => {
         setReservations(filteredReservations);
       }
     } catch (err) {
-      setError(err.message);
+      // 404 에러 발생 시 '예약 내역이 없습니다' 메시지 표시
+      if (err.response && err.response.status === 404) {
+        setReservations([]); // 예약 목록을 비웁니다.
+      } else {
+        setError(err.message); // 다른 종류의 에러 메시지 설정
+      }
     } finally {
       setLoading(false);
     }
   };
 
+  
   useEffect(() => {
     loadReservations();
   }, []);
@@ -50,11 +56,11 @@ const MyPage = () => {
     if (confirmCancel) {
       try {
         const token = getToken();
-        await deleteReservation(reservationId, token);
-  
-        setDeletedReservationIds(prevIds => [...prevIds, reservationId]);
-        const updatedReservations = reservations.filter(reservation => reservation._id !== reservationId);
-        setReservations(updatedReservations);
+        const deletedId = await deleteReservation(reservationId, token);
+        if (deletedId) {
+          const updatedReservations = reservations.filter(reservation => reservation._id !== deletedId);
+          setReservations(updatedReservations);
+        }
       } catch (err) {
         setError(err.message);
       }
@@ -66,11 +72,15 @@ const MyPage = () => {
 
   return (
     <div>
-      <h1>나의 예약 정보</h1>
-      {reservations.length === 0 ? (
-        <p>예약 내역이 없습니다.</p>
-      ) : (
-        <ul>
+    <h1>나의 예약 정보</h1>
+    {loading ? (
+      <div>Loading...</div>
+    ) : error ? (
+      <div>Error: {error}</div>
+    ) : reservations.length === 0 ? (
+      <p>예약 내역이 없습니다.</p>
+    ) : (
+      <ul>
           {Array.isArray(reservations) && reservations.map(reservation => (
             <li key={reservation._id}>
               <div>예약자명: {userName}</div>
