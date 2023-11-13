@@ -44,6 +44,7 @@ const ReservationModal = (props) => {
         .map(reservation => {
           // 예약된 시작 시간을 분석하여 시간 슬롯 인덱스로 변환
           const startTime = parseInt(reservation.bookTime.split(':')[0], 10) - 9;
+          console.log([`{예약 정보: 방 이름 - ${reservation.roomId}, 예약 시간 - ${reservation.bookTime}, 예약자 ID - ${reservation.userId}}`]);
           return startTime;
         });
   
